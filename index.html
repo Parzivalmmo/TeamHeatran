@@ -49,6 +49,8 @@ clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);box-shadow:0 0 18
 .bar{height:6px;background:rgba(127,127,127,.25);margin-top:6px}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 8px var(--acc)}
 .nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.nav.c{justify-content:center;gap:12px}
+.nav.c .btn{flex:0 1 auto}
 .lnk{background:none;border:0;color:var(--mut);font:700 18px 'Comic Neue',cursive;cursor:pointer}
 .lnk:hover{color:var(--acc)}
 .lead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -61,8 +63,6 @@ clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);box-shadow:0 0 18
 .vars{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .vars button{font:400 19px Bangers,Impact,cursive;padding:9px 14px;cursor:pointer;color:var(--txt);background:var(--pan);border:1px solid var(--line)}
 .vars button.on{border-color:var(--acc);color:var(--acc);box-shadow:0 0 12px rgba(var(--glow),.4)}
-.done{display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:700}
-.done input{width:20px;height:20px;accent-color:var(--acc)}
 .m{font-weight:700}
 .tr{height:56px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(var(--glow),.55))}.tr.s{height:44px}.gh{display:flex;align-items:center;gap:14px;margin:10px 0 2px}
 h2.sec{font-size:15px;color:var(--acc);margin:22px 0 4px;text-transform:uppercase}
@@ -140,9 +140,6 @@ const hl=t=>{let h=esc(t);
 const ball=n=>`<div class="mon"><div class="ball" style="--c:${MONS[n][0]}"><img src="https://play.pokemonshowdown.com/sprites/gen5/${MONS[n][1]}.png" alt="${n}" onerror="this.onerror=null;this.src=IM.m['${n}']"></div><span style="color:${MONS[n][0]}">${n}</span></div>`;
 const tr=(r,i,v)=>IM.t[r+'-'+i+(r==='teselia'&&i===3?'-'+(v||0):'')]||'';
 const tim=(r,i,v,c)=>{const u=tr(r,i,v);return u?`<img class="tr ${c||''}" src="${u}" alt="">`:''};
-let done=store.get('tp_done',{});
-const key=(r,i)=>r+'-'+i;
-const cnt=r=>r.g.filter((_,i)=>done[key(r.id,i)]).length;
 
 /* ===== TEMAS ===== */
 function setTheme(t){document.documentElement.dataset.theme=t;store.set('tp_theme',t);document.querySelectorAll('#th button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
@@ -151,17 +148,14 @@ setTheme(store.get('tp_theme','ambar'));
 
 /* ===== VISTAS ===== */
 function home(){
- const tot=REG.reduce((a,r)=>a+r.g.length,0),dn=REG.reduce((a,r)=>a+cnt(r),0);
+ const tot=REG.reduce((a,r)=>a+r.g.length,0);
  app.innerHTML=`<section class="card hero"><span class="mut o" style="font-size:16px">RERUN DE GIMNASIOS · POKEMMO</span><h1>PREHISTÓRICO 5</h1>
  <p>Guía paso a paso para farmear los ${tot} gimnasios con este equipo.</p><div class="team">${Object.keys(MONS).map(ball).join('')}</div>
- <div class="bar"><i style="width:${dn/tot*100}%"></i></div><p class="mut" style="font-size:18px">Progreso: ${dn} de ${tot} gimnasios</p>
- <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="location.hash='#/r/hoenn'">Empieza el rerun ›</button><button class="btn g" onclick="resetP()">Reiniciar progreso</button></div></section>
- <h2 class="sec o">Empieza por Hoenn</h2><div class="rg">${REG.map(r=>`<button class="card row" onclick="location.hash='#/r/${r.id}'"><div><h3 class="o">${r.n}</h3><small>${r.g.length} gimnasios · ${cnt(r)} completados</small></div><span class="go">›</span></button>`).join('')}</div>`}
-function resetP(){if(confirm('¿Borrar todo tu progreso marcado?')){done={};store.set('tp_done',done);home()}}
+  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="location.hash='#/r/hoenn'">Empieza el rerun ›</button></div></section>
+ <h2 class="sec o">Empieza por Hoenn</h2><div class="rg">${REG.map(r=>`<button class="card row" onclick="location.hash='#/r/${r.id}'"><div><h3 class="o">${r.n}</h3><small>${r.g.length} gimnasios</small></div><span class="go">›</span></button>`).join('')}</div>`}
 function region(id){const r=REG.find(x=>x.id===id);if(!r)return home();
  app.innerHTML=`<div class="nav"><button class="lnk" onclick="location.hash='#/'">‹ Inicio</button></div><h2 class="o" style="font-size:34px;color:var(--acc)">Gimnasios de ${r.n}</h2>
- <div class="bar"><i style="width:${cnt(r)/r.g.length*100}%"></i></div>
- ${r.g.map((g,i)=>`<button class="card row" onclick="location.hash='#/g/${r.id}/${i}'"><span class="num">${i+1}</span>${tim(r.id,i,0,'s')}<div><h3 class="o" style="font-size:23px">${g.n}</h3><small>${done[key(r.id,i)]?'✔ Completado':(g.v?g.v.length+' variantes':'Pendiente')}</small></div><span class="go">›</span></button>`).join('')}`}
+ ${r.g.map((g,i)=>`<button class="card row" onclick="location.hash='#/g/${r.id}/${i}'"><span class="num">${i+1}</span>${tim(r.id,i,0,'s')}<div><h3 class="o" style="font-size:23px">${g.n}</h3><small>${g.v?g.v.length+' variantes':'Ver guía'}</small></div><span class="go">›</span></button>`).join('')}`}
 function gym(id,i,vi){const r=REG.find(x=>x.id===id),g=r&&r.g[i];if(!g)return home();
  const v=g.v?g.v[vi||0]:g,ri=REG.indexOf(r),last=i===r.g.length-1,nx=REG[ri+1];
  const box=(c,t,x)=>`<div class="card ${c}"><span class="tag">${TN[c]||''}</span>${hl(x)}</div>`;
@@ -174,13 +168,11 @@ function gym(id,i,vi){const r=REG.find(x=>x.id===id),g=r&&r.g[i];if(!g)return ho
  ${v.s.map((s,k)=>`<div class="card"><div class="st"><span class="num">${k+1}</span><div><span class="tag" style="color:var(--acc)">Paso</span>${hl(s)}</div></div></div>`).join('')}
  ${(v.t||[]).map(([c,x])=>box(c,'',x)).join('')}
  ${v.f?`<div class="card fly">✈ <span class="mut">¿Olvidaste a dónde ir? Mira abajo:</span><br><b>VUELA A: ${esc(v.f.toUpperCase())}</b></div>`:''}
- <div class="card"><label class="done"><input type="checkbox" ${done[key(id,i)]?'checked':''} onchange="mark('${id}',${i},this.checked)"> Marcar gimnasio como completado</label>
- <div class="nav" style="margin-top:12px">
+ <div class="card"><div class="nav c">
   <button class="btn g" ${i===0?'disabled':''} onclick="location.hash='#/g/${id}/${i-1}'">‹ Gimnasio anterior</button>
   ${g.end?`<button class="btn" onclick="location.hash='#/'">¡Rerun completado! Volver al inicio</button>`:
   last?`<button class="btn" onclick="location.hash='#/r/${nx.id}'">Siguiente región: ${nx.n} ›</button>`:`<button class="btn" onclick="location.hash='#/g/${id}/${i+1}'">Siguiente gimnasio ›</button>`}
  </div></div>`}
-function mark(r,i,c){c?done[key(r,i)]=1:delete done[key(r,i)];store.set('tp_done',done)}
 function route(){const p=location.hash.replace(/^#\/?/,'').split('/');window.scrollTo(0,0);
  if(p[0]==='r')region(p[1]);else if(p[0]==='g')gym(p[1],+p[2],+p[3]||0);else home()}
 addEventListener('hashchange',route);route();
